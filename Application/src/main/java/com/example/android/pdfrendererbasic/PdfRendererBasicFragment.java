@@ -20,14 +20,19 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -37,6 +42,28 @@ import java.io.IOException;
  * pages. We use a {@link android.graphics.pdf.PdfRenderer} to render PDF pages as {@link android.graphics.Bitmap}s.
  */
 public class PdfRendererBasicFragment extends Fragment implements View.OnClickListener {
+
+    Matrix mMatrix = new Matrix();
+    Float scale = 1f;
+    ScaleGestureDetector mScaleGestDetector;
+
+
+    int currentY;
+    int currentX;
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            scale = scale * detector.getScaleFactor();
+            scale = Math.max(0.1f, Math.min(scale, 5f));
+            mMatrix.setScale(scale, scale);
+            mImageView.setImageMatrix(mMatrix);
+            return true;
+        }
+    }
+
+
 
     /**
      * Key string for saving the state of current page index.
@@ -77,10 +104,47 @@ public class PdfRendererBasicFragment extends Fragment implements View.OnClickLi
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup cont,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_pdf_renderer_basic, container, false);
+        View view = inflater.inflate(R.layout.fragment_pdf_renderer_basic, cont, false);
+        final LinearLayout container = (LinearLayout) view.findViewById(R.id.image_container);
+        container.scrollTo(220, 400);
+        mScaleGestDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                mScaleGestDetector.onTouchEvent(event);
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        currentX = (int) event.getRawX();
+                        currentY = (int) event.getRawY();
+                        break;
+                    }
+
+                    case MotionEvent.ACTION_MOVE: {
+                        int x2 = (int) event.getRawX();
+                        int y2 = (int) event.getRawY();
+                        container.scrollBy(currentX - x2 , currentY - y2);
+                        currentX = x2;
+                        currentY = y2;
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        break;
+                    }
+                }
+
+                return true;
+            }
+        });
+
+        return view;
     }
+
+//    public void delegate(MotionEvent event) {
+//        mScaleGestDetector.onTouchEvent(event);
+//    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -99,6 +163,7 @@ public class PdfRendererBasicFragment extends Fragment implements View.OnClickLi
             index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
         }
         showPage(index);
+
     }
 
     @Override

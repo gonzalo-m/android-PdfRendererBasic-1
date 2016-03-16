@@ -21,10 +21,17 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 public class MainActivity extends Activity {
 
     public static final String FRAGMENT_PDF_RENDERER_BASIC = "pdf_renderer_basic";
+
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        ((PdfRendererBasicFragment)getFragmentManager().findFragmentByTag(FRAGMENT_PDF_RENDERER_BASIC)).delegate(event);
+//        return true;
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

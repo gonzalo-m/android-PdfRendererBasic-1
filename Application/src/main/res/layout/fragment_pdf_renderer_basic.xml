@@ -21,13 +21,20 @@
     android:orientation="vertical"
     tools:context=".MainActivity$PlaceholderFragment">
 
-    <ImageView
-        android:id="@+id/image"
+    <LinearLayout
+        android:id="@+id/image_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@android:color/white"
-        android:scaleType="fitCenter" />
+        android:layout_weight="1">
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:scaleType="matrix" />
+    </LinearLayout>
+
+
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
